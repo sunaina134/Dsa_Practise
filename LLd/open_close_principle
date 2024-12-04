@@ -1,0 +1,146 @@
+The **Open/Closed Principle (OCP)** states that a class should be **open for extension** but **closed for modification**. This means you should be able to extend a class's behavior without altering its existing code. 
+
+Here’s an easy and clear example in C++:
+
+---
+
+### Problem: Violating OCP
+
+Consider a `Shape` class that calculates the area of different shapes. Each time a new shape is added, the `Shape` class needs to be modified. This violates OCP.
+
+```cpp
+#include <iostream>
+#include <vector>
+
+class Shape {
+public:
+    enum ShapeType { CIRCLE, RECTANGLE };
+    ShapeType type;
+
+    double radius; // For circle
+    double width, height; // For rectangle
+
+    Shape(ShapeType t, double r = 0, double w = 0, double h = 0)
+        : type(t), radius(r), width(w), height(h) {}
+};
+
+class AreaCalculator {
+public:
+    double calculateArea(const Shape& shape) {
+        if (shape.type == Shape::CIRCLE) {
+            return 3.14159 * shape.radius * shape.radius;
+        } else if (shape.type == Shape::RECTANGLE) {
+            return shape.width * shape.height;
+        }
+        return 0;
+    }
+};
+
+int main() {
+    Shape circle(Shape::CIRCLE, 5);
+    Shape rectangle(Shape::RECTANGLE, 0, 4, 6);
+
+    AreaCalculator calculator;
+    std::cout << "Circle Area: " << calculator.calculateArea(circle) << std::endl;
+    std::cout << "Rectangle Area: " << calculator.calculateArea(rectangle) << std::endl;
+
+    return 0;
+}
+```
+
+**Problem:**  
+Adding a new shape (e.g., `Triangle`) would require modifying the `Shape` class and the `AreaCalculator` class, breaking OCP.
+
+---
+
+### Solution: Applying OCP
+
+Use **polymorphism** to extend functionality without modifying existing code. Each shape will have its own implementation of the `area()` function.
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <memory>
+
+// Abstract base class for shapes
+class Shape {
+public:
+    virtual ~Shape() = default;
+
+    // Each shape defines how to calculate its area
+    virtual double area() const = 0;
+};
+
+// Circle class
+class Circle : public Shape {
+private:
+    double radius;
+
+public:
+    explicit Circle(double r) : radius(r) {}
+    double area() const override {
+        return 3.14159 * radius * radius;
+    }
+};
+
+// Rectangle class
+class Rectangle : public Shape {
+private:
+    double width, height;
+
+public:
+    Rectangle(double w, double h) : width(w), height(h) {}
+    double area() const override {
+        return width * height;
+    }
+};
+
+// Area calculator (uses polymorphism)
+class AreaCalculator {
+public:
+    double totalArea(const std::vector<std::shared_ptr<Shape>>& shapes) const {
+        double total = 0;
+        for (const auto& shape : shapes) {
+            total += shape->area();
+        }
+        return total;
+    }
+};
+
+int main() {
+    // Create shapes
+    std::vector<std::shared_ptr<Shape>> shapes;
+    shapes.push_back(std::make_shared<Circle>(5));
+    shapes.push_back(std::make_shared<Rectangle>(4, 6));
+
+    // Calculate total area
+    AreaCalculator calculator;
+    std::cout << "Total Area: " << calculator.totalArea(shapes) << std::endl;
+
+    return 0;
+}
+```
+
+---
+
+### Advantages:
+1. **Open for Extension**: New shapes (e.g., `Triangle`) can be added by creating a new class without modifying existing code.
+2. **Closed for Modification**: The `AreaCalculator` class and existing `Shape` classes remain untouched.
+3. **Polymorphism**: The design is clean, leveraging virtual functions for extensibility.
+
+To add a `Triangle`, you simply create a new class:
+
+```cpp
+class Triangle : public Shape {
+private:
+    double base, height;
+
+public:
+    Triangle(double b, double h) : base(b), height(h) {}
+    double area() const override {
+        return 0.5 * base * height;
+    }
+};
+```
+
+Now, just include a `Triangle` object in the `shapes` vector, and everything works without modifying any existing code.

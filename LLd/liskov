@@ -1,0 +1,132 @@
+The **Liskov Substitution Principle (LSP)** states that **objects of a superclass should be replaceable with objects of its subclasses without affecting the correctness of the program.** In simpler terms, derived classes should behave like their base classes, ensuring that they don't break the functionality expected from the base class.
+
+Here’s an easy-to-understand example in C++:
+
+---
+
+### Problem: Violating LSP
+
+Imagine we have a base class `Bird` with a method `fly()`. If we create a subclass `Penguin` that doesn't fly, calling `fly()` on a `Penguin` object would violate the expected behavior of `Bird`.
+
+```cpp
+#include <iostream>
+
+class Bird {
+public:
+    virtual void fly() const {
+        std::cout << "I am flying!" << std::endl;
+    }
+};
+
+class Sparrow : public Bird {};
+
+class Penguin : public Bird {
+public:
+    void fly() const override {
+        // Penguins can't fly
+        std::cout << "I can't fly!" << std::endl;
+    }
+};
+
+void makeBirdFly(const Bird& bird) {
+    bird.fly();
+}
+
+int main() {
+    Sparrow sparrow;
+    Penguin penguin;
+
+    makeBirdFly(sparrow); // Works fine
+    makeBirdFly(penguin); // Violates LSP, as Penguins can't fly
+
+    return 0;
+}
+```
+
+**Problem:**  
+The `Penguin` class overrides `fly()` in a way that breaks the behavior expected from a `Bird`. This violates LSP, as `Penguin` is not truly substitutable for `Bird`.
+
+---
+
+### Solution: Applying LSP
+
+Refactor the design by separating the behavior of flying birds from non-flying birds. Use composition or more specific base classes to ensure that derived classes adhere to the expected behavior.
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <vector>
+
+// Base class
+class Bird {
+public:
+    virtual ~Bird() = default;
+    virtual void display() const {
+        std::cout << "I am a bird!" << std::endl;
+    }
+};
+
+// FlyingBird class
+class FlyingBird : public Bird {
+public:
+    void fly() const {
+        std::cout << "I am flying!" << std::endl;
+    }
+};
+
+// NonFlyingBird class
+class NonFlyingBird : public Bird {
+public:
+    void walk() const {
+        std::cout << "I am walking!" << std::endl;
+    }
+};
+
+// Specific bird classes
+class Sparrow : public FlyingBird {};
+class Penguin : public NonFlyingBird {};
+
+// Function to demonstrate correct usage
+void observeBird(const Bird& bird) {
+    bird.display();
+}
+
+int main() {
+    Sparrow sparrow;
+    Penguin penguin;
+
+    // Correctly separated behavior
+    sparrow.fly(); // Works fine
+    penguin.walk(); // Works fine
+
+    // Both can be treated as Birds for general actions
+    observeBird(sparrow);
+    observeBird(penguin);
+
+    return 0;
+}
+```
+
+---
+
+### Explanation of the Solution
+
+1. **Separate Behaviors**:
+   - Created `FlyingBird` and `NonFlyingBird` classes to represent flying and non-flying birds.
+   - This ensures each subclass (`Sparrow` and `Penguin`) only implements relevant behaviors.
+
+2. **Avoiding Misleading Behavior**:
+   - The `Penguin` class no longer pretends to "fly" when it can't.
+   - LSP is maintained because all birds behave as expected based on their specific categories.
+
+3. **Polymorphism**:
+   - Both `Sparrow` and `Penguin` can still be used as `Bird` for general operations like `display()`.
+
+---
+
+### Key Points About LSP:
+- Subclasses must honor the behavior of their base class.
+- Redesign your inheritance structure if a subclass cannot fully comply with the expectations of the base class.
+- Favor separating behaviors into specific base classes if the general base class is too broad. 
+
+This approach adheres to **LSP** and results in a clean, extensible, and robust design.

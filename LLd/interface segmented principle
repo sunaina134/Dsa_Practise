@@ -1,0 +1,141 @@
+The **Interface Segregation Principle (ISP)** states:  
+**"A class should not be forced to implement interfaces it does not use."**
+
+In simpler terms, if an interface has many methods, split it into smaller, more specific interfaces so that classes only implement the methods they need.
+
+---
+
+### Why ISP is Important?
+
+- Prevents **"fat interfaces"** where a class is forced to implement irrelevant methods.
+- Ensures each class only depends on the parts of an interface it truly needs.
+- Makes code cleaner, easier to maintain, and reduces unnecessary dependencies.
+
+---
+
+### Problem: Violating ISP
+
+Consider a large interface `Animal` with multiple methods:
+
+```cpp
+#include <iostream>
+
+// A large interface (violating ISP)
+class Animal {
+public:
+    virtual void eat() = 0;
+    virtual void run() = 0;
+    virtual void swim() = 0;
+    virtual void fly() = 0;
+};
+
+// Dog class is forced to implement methods it doesn't need
+class Dog : public Animal {
+public:
+    void eat() override {
+        std::cout << "Dog is eating." << std::endl;
+    }
+
+    void run() override {
+        std::cout << "Dog is running." << std::endl;
+    }
+
+    void swim() override {
+        std::cout << "Dog is swimming." << std::endl;
+    }
+
+    void fly() override {
+        // Dogs can't fly!
+        std::cout << "Dog can't fly!" << std::endl;
+    }
+};
+```
+
+**Problem**:  
+- The `Dog` class is forced to implement `fly()` even though dogs can't fly.  
+- This violates ISP because `Dog` is implementing an interface it doesn't fully need.
+
+---
+
+### Solution: Applying ISP
+
+Split the large `Animal` interface into smaller, specific interfaces.
+
+```cpp
+#include <iostream>
+
+// Separate interfaces for specific capabilities
+class Eater {
+public:
+    virtual void eat() = 0;
+    virtual ~Eater() = default;
+};
+
+class Runner {
+public:
+    virtual void run() = 0;
+    virtual ~Runner() = default;
+};
+
+class Swimmer {
+public:
+    virtual void swim() = 0;
+    virtual ~Swimmer() = default;
+};
+
+class Flyer {
+public:
+    virtual void fly() = 0;
+    virtual ~Flyer() = default;
+};
+
+// Dog class only implements the interfaces it needs
+class Dog : public Eater, public Runner, public Swimmer {
+public:
+    void eat() override {
+        std::cout << "Dog is eating." << std::endl;
+    }
+
+    void run() override {
+        std::cout << "Dog is running." << std::endl;
+    }
+
+    void swim() override {
+        std::cout << "Dog is swimming." << std::endl;
+    }
+};
+
+// Bird class implements flying-related behavior
+class Bird : public Eater, public Flyer {
+public:
+    void eat() override {
+        std::cout << "Bird is eating." << std::endl;
+    }
+
+    void fly() override {
+        std::cout << "Bird is flying." << std::endl;
+    }
+};
+```
+
+---
+
+### Key Improvements:
+1. **Specific Interfaces**:
+   - `Dog` only implements `Eater`, `Runner`, and `Swimmer`.
+   - `Bird` only implements `Eater` and `Flyer`.
+
+2. **No Irrelevant Methods**:
+   - `Dog` doesn't need to implement `fly()` anymore.
+
+3. **Clean Code**:
+   - Classes now only depend on the parts of the interface they actually use.
+
+---
+
+### Advantages of ISP:
+- **Reduced Coupling**: Classes are only tied to the methods they care about.
+- **Better Maintenance**: If a capability changes (e.g., `fly()`), only classes using that capability are affected.
+- **Extensibility**: New behaviors can be added by creating new interfaces without impacting existing classes.
+
+This is how the **Interface Segregation Principle (ISP)** improves your design in C++!

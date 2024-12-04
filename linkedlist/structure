@@ -1,0 +1,15 @@
+class {
+    public:
+    int data;
+    Node* next;
+    Node(int data, Node* next;){
+    this->data=data;
+    this->next=NULL;
+
+}
+};
+int main(){
+  vector<int> arr={2,38,7};
+  Node* y=new Node(arr[0],nullptr);
+  cout<<y.data;
+}

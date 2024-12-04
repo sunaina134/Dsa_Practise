@@ -1,0 +1,93 @@
+The **Single Responsibility Principle (SRP)** states that a class should have only one reason to change, meaning it should have only one job or responsibility. This keeps the class focused and makes the code easier to maintain and extend.
+
+Here’s a simple example in C++:
+
+### Problem: Violating SRP
+
+```cpp
+#include <iostream>
+#include <string>
+#include <fstream>
+
+class Report {
+public:
+    std::string content;
+
+    Report(const std::string& content) : content(content) {}
+
+    // Generates the report content
+    void generateReport() {
+        std::cout << "Report generated: " << content << std::endl;
+    }
+
+    // Saves the report to a file (violates SRP)
+    void saveToFile(const std::string& fileName) {
+        std::ofstream file(fileName);
+        if (file.is_open()) {
+            file << content;
+            file.close();
+            std::cout << "Report saved to file: " << fileName << std::endl;
+        }
+    }
+};
+```
+
+The `Report` class is responsible for both **generating** and **saving** the report, violating SRP. If file-saving functionality changes (e.g., saving to a database), the `Report` class must also change.
+
+---
+
+### Solution: Applying SRP
+
+Separate the responsibilities into two classes:  
+1. `Report` for managing report content.
+2. `ReportSaver` for handling saving logic.
+
+```cpp
+#include <iostream>
+#include <string>
+#include <fstream>
+
+// Handles report content
+class Report {
+public:
+    std::string content;
+
+    Report(const std::string& content) : content(content) {}
+
+    void generateReport() const {
+        std::cout << "Report generated: " << content << std::endl;
+    }
+};
+
+// Handles saving reports
+class ReportSaver {
+public:
+    void saveToFile(const Report& report, const std::string& fileName) const {
+        std::ofstream file(fileName);
+        if (file.is_open()) {
+            file << report.content;
+            file.close();
+            std::cout << "Report saved to file: " << fileName << std::endl;
+        } else {
+            std::cerr << "Error: Could not open file " << fileName << std::endl;
+        }
+    }
+};
+
+int main() {
+    Report myReport("This is a sample report.");
+    myReport.generateReport();
+
+    ReportSaver saver;
+    saver.saveToFile(myReport, "report.txt");
+
+    return 0;
+}
+```
+
+---
+
+### Advantages of SRP Applied:
+1. **Maintainability**: If saving logic changes (e.g., saving to the cloud), only `ReportSaver` needs modification.
+2. **Testability**: You can test `Report` and `ReportSaver` independently.
+3. **Flexibility**: You can easily add new ways to save the report (e.g., database) without affecting the report content.
